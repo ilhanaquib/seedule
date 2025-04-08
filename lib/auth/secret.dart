@@ -1,0 +1,1 @@
+var geminiKey = 'AIzaSyABfx3oBrPGvbBcwu6GOr2S_dgmgW7_Xdw';
