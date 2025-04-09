@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:seedule/database/db_helper.dart';
+import 'package:seedule/global.dart';
 import 'package:seedule/schedule.dart';
 
 class SavedScheduleList extends StatefulWidget {
@@ -21,7 +22,13 @@ class _SavedScheduleListState extends State<SavedScheduleList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Saved Plans')),
+      appBar: AppBar(
+        title: Text(
+          'Saved Plans',
+          style: TextStyle(color: AppColors.background),
+        ),
+        backgroundColor: AppColors.primary,
+      ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: savedPlans,
         builder: (context, snapshot) {
@@ -40,14 +47,22 @@ class _SavedScheduleListState extends State<SavedScheduleList> {
                 return ListTile(
                   title: Text(plan['plant_name']),
                   subtitle: Text('Tap to view details'),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () async {
+                      await DBHelper().deletePlan(plan['id']);
+                      setState(() {
+                        savedPlans = DBHelper().getPlans(); // Refresh list
+                      });
+                    },
+                  ),
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder:
                             (context) => ScheduleScreen(
-                              savedPlanJson:
-                                  plan['plan_json'],
+                              savedPlanJson: plan['plan_json'],
                             ),
                       ),
                     );

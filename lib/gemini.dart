@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 import 'package:seedule/auth/secret.dart';
+import 'package:seedule/global.dart';
 import 'package:seedule/schedule.dart';
 
 class GeminiWidget extends StatefulWidget {
@@ -142,8 +143,8 @@ Only use this structure. Do not add anything extra.
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Seedule'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
+        title: Text('Seedule', style: TextStyle(color: AppColors.background)),
+        backgroundColor: AppColors.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12.0),

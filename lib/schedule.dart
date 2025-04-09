@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 import 'package:seedule/auth/secret.dart';
+import 'package:seedule/global.dart';
 import 'database/db_helper.dart';
 
 class ScheduleScreen extends StatefulWidget {
@@ -103,18 +104,13 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.pop(
-                    context,
-                  ); // Close the dialog without returning a name
+                  Navigator.pop(context);
                 },
                 child: Text('Cancel'),
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.pop(
-                    context,
-                    controller.text,
-                  ); // Return the entered plan name
+                  Navigator.pop(context, controller.text);
                 },
                 child: Text('Save'),
               ),
@@ -123,7 +119,6 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         },
       );
 
-      // If a plan name was provided, save the plan to the database
       if (planName != null && planName.isNotEmpty) {
         try {
           await DBHelper().savePlan(planName, response!);
@@ -142,7 +137,10 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Plant Care Plan')),
+      appBar: AppBar(
+        title: Text('Seedule', style: TextStyle(color: AppColors.background)),
+        backgroundColor: AppColors.primary,
+      ),
       body: Column(
         children: [
           widget.plant != null

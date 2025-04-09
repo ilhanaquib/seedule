@@ -46,4 +46,9 @@ class DBHelper {
     final db = await database;
     return await db.query('plans');
   }
+
+  Future<void> deletePlan(int id) async {
+    final db = await database;
+    await db.delete('plans', where: 'id = ?', whereArgs: [id]);
+  }
 }

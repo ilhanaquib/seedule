@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:seedule/gemini.dart';
+import 'package:seedule/global.dart';
 import 'package:seedule/saved_schedule.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -79,8 +80,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('Seedule'),
+        backgroundColor: AppColors.primary,
+        title: Text('Seedule', style: TextStyle(color: AppColors.background)),
       ),
       body: Center(
         child: Column(
