@@ -52,7 +52,7 @@ class _SavedScheduleListState extends State<SavedScheduleList> {
                     onPressed: () async {
                       await DBHelper().deletePlan(plan['id']);
                       setState(() {
-                        savedPlans = DBHelper().getPlans(); // Refresh list
+                        savedPlans = DBHelper().getPlans();
                       });
                     },
                   ),

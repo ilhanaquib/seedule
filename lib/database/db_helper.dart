@@ -7,16 +7,13 @@ class DBHelper {
   Future<Database> get database async {
     if (_database != null) return _database!;
 
-    // If the database doesn't exist, create it
     _database = await _initDB();
     return _database!;
   }
 
   _initDB() async {
-    // Get the path to the database
     String path = join(await getDatabasesPath(), 'plant_plan.db');
 
-    // Open the database, if it doesn't exist, create it
     return await openDatabase(
       path,
       version: 1,
@@ -32,7 +29,6 @@ class DBHelper {
     );
   }
 
-  // Insert a new plan
   Future<void> savePlan(String plantName, String planJson) async {
     final db = await database;
     await db.insert('plans', {
@@ -41,7 +37,6 @@ class DBHelper {
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  // Get all saved plans
   Future<List<Map<String, dynamic>>> getPlans() async {
     final db = await database;
     return await db.query('plans');

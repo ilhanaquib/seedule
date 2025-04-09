@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:seedule/gemini.dart';
-
 import 'package:seedule/home.dart';
 
 void main() {
@@ -15,7 +13,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Seedule',
       home: const MyHomePage(title: 'Seedule'),
-      //home: const GeminiWidget(),
     );
   }
 }

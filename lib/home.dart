@@ -22,20 +22,19 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // functions
   Future<void> requestPermissions() async {
-    // Ask for multiple permissions
     Map<Permission, PermissionStatus> statuses =
         await [
           Permission.camera,
           Permission.storage,
-          Permission.photos, // For iOS
+          Permission.photos,
         ].request();
 
     if (statuses[Permission.camera]!.isGranted &&
         (statuses[Permission.storage]!.isGranted ||
             statuses[Permission.photos]!.isGranted)) {
-      print("All permissions granted!");
+      //print("All permissions granted!");
     } else {
-      print("Some permissions denied.");
+      //print("Some permissions denied.");
     }
   }
 
