@@ -16,11 +16,14 @@ class GeminiWidget extends StatefulWidget {
 }
 
 class _GeminiWidgetState extends State<GeminiWidget> {
-  String? response;
+  Map<String, String>? plantInfo;
   Uint8List? imageByte;
+  String? rawResponse;
+  bool isLoading = true;
+
   final _generativeModel = GenerativeModel(
     model: 'gemini-1.5-flash-latest',
-    apiKey: '$geminiKey',
+    apiKey: geminiKey,
   );
 
   @override
@@ -38,35 +41,100 @@ class _GeminiWidgetState extends State<GeminiWidget> {
   }
 
   void generateResponse() async {
-    if (imageByte == null) {
-      setState(() {
-        response = 'Image is still loading...';
-      });
-      return;
-    }
+    if (imageByte == null) return;
 
-    final prompt =
-        'You are a plant expert. I want you to look at the image provided which could either be of seeds, seed packets, sapling or just plants and tell me what kind of plant it is. give me both the layman name for it and the scientific name.';
+    setState(() {
+      isLoading = true;
+      rawResponse = null;
+      plantInfo = null;
+    });
+
+    final prompt = '''
+You are a plant expert. Given the image, identify the plant and return the response in this structured format:
+
+Plant Name: [Common name]
+Scientific Name: [Scientific name]
+Description: [1-2 lines about the plant]
+Plant Type: [Seed / Sapling / Full-grown plant]
+Care Tips: [Short care tips]
+
+Only use this structure. Do not add anything extra.
+''';
+
     final content = [
       Content.multi([TextPart(prompt), DataPart('image/jpeg', imageByte!)]),
     ];
 
     try {
       final genResponse = await _generativeModel.generateContent(content);
+      final text = genResponse.text ?? '';
+
       setState(() {
-        response = genResponse.text;
+        rawResponse = text;
+        plantInfo = _parsePlantResponse(text);
+        isLoading = false;
       });
     } catch (e) {
       setState(() {
-        response = 'Failed to generate content: $e';
+        rawResponse = 'Failed to generate content: $e';
+        isLoading = false;
       });
     }
   }
 
-  void checklist() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ScheduleScreen(plant: response!,)),
+  Map<String, String> _parsePlantResponse(String response) {
+    final lines = response.split('\n');
+    final data = <String, String>{};
+
+    for (var line in lines) {
+      if (line.contains(':')) {
+        final parts = line.split(':');
+        if (parts.length >= 2) {
+          data[parts[0].trim()] = parts.sublist(1).join(':').trim();
+        }
+      }
+    }
+    return data;
+  }
+
+  void goToChecklist() {
+    if (plantInfo != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder:
+              (context) =>
+                  ScheduleScreen(plant: plantInfo!['Plant Name'] ?? 'Unknown'),
+        ),
+      );
+    }
+  }
+
+  Widget buildPlantInfoCard() {
+    if (plantInfo == null) {
+      return Text(rawResponse ?? 'No response yet.');
+    }
+
+    return Card(
+      elevation: 4,
+      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children:
+              plantInfo!.entries.map((entry) {
+                return ListTile(
+                  title: Text(
+                    entry.key,
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(entry.value),
+                  contentPadding: EdgeInsets.symmetric(vertical: 4),
+                );
+              }).toList(),
+        ),
+      ),
     );
   }
 
@@ -74,19 +142,43 @@ class _GeminiWidgetState extends State<GeminiWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text('Seedule'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(height: 20),
-            Text(response ?? 'Loading response...'),
-            Text('You can create schedule if this is the correct plant'),
-            ElevatedButton(onPressed: checklist, child: Text('Create plan')),
-            ElevatedButton(onPressed: generateResponse, child: Text('Retry')),
-          ],
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(height: 20),
+                if (imageByte != null)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.memory(imageByte!, height: 200),
+                  ),
+                SizedBox(height: 20),
+                isLoading ? CircularProgressIndicator() : buildPlantInfoCard(),
+                SizedBox(height: 20),
+                if (!isLoading)
+                  Column(
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: goToChecklist,
+                        icon: Icon(Icons.check),
+                        label: Text('Create Plan'),
+                      ),
+                      SizedBox(height: 10),
+                      OutlinedButton.icon(
+                        onPressed: generateResponse,
+                        icon: Icon(Icons.refresh),
+                        label: Text('Retry'),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
